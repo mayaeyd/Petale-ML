@@ -27,5 +27,25 @@ def predict_flower(request):
             image_array = np.expand_dims(image_array, axis=0)
             image_array = image_array / 255.0
 
+            # Make prediction
+            prediction = model.predict(image_array)
+            predicted_class = np.argmax(prediction[0])
+            confidence = float(prediction[0][predicted_class])
+            flower_name = class_labels[str(predicted_class)]
+            
+            # Save prediction
+            flower_pred = FlowerPrediction(
+                image=image_file,
+                prediction=flower_name,
+                confidence=confidence
+            )
+            flower_pred.save()
+            
+            return JsonResponse({
+                'flower': flower_name,
+                'confidence': confidence
+            })
+
+
         return JsonResponse({'message':'Endpoint created'})
     return JsonResponse({'error': 'Only POST requests allowed'}, status=405)
